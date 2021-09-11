@@ -1,5 +1,9 @@
 import express, { Response, Request, Application } from 'express';
-import { getPopularMovies, searchMovie } from '../services/moviesAPI';
+import {
+  getMovieDetails,
+  getPopularMovies,
+  searchMovie,
+} from '../services/moviesAPI';
 
 export const moviesRoutes = (app: Application): void => {
   const router = express.Router();
@@ -33,6 +37,29 @@ export const moviesRoutes = (app: Application): void => {
 
     try {
       const response = await searchMovie(query, page);
+
+      return res.status(200).json({ ...response, error: false, message: '' });
+    } catch (error) {
+      console.error(error.message);
+      return res
+        .status(500)
+        .json({ movies: [], error: true, message: error.message });
+    }
+  });
+
+  router.get('/details/:id', async (req: Request, res: Response) => {
+    const id: string = req.params.id;
+
+    if (!id) {
+      return res.status(400).json({
+        movies: [],
+        error: true,
+        message: 'you must include an id',
+      });
+    }
+
+    try {
+      const response = await getMovieDetails(id);
 
       return res.status(200).json({ ...response, error: false, message: '' });
     } catch (error) {
